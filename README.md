@@ -1,6 +1,6 @@
 # EnhancedSppIDer
 
-**Version: 0.2.0**
+**Version: 0.2.1**
 
 An enhanced version of [sppIDer](https://github.com/GLBRC/sppIDer) for species identification and read extraction from sequencing data.
 
@@ -142,6 +142,8 @@ python ../scripts/sppIDer.py \
 
 ### Step 4: Extract Reads by Species (Standalone)
 
+**Note:** The original sppIDer does not support extracting read IDs or species-specific reads. This is a new feature in EnhancedSppIDer.
+
 If you already have sppIDer output and want to extract reads separately:
 
 ```bash
@@ -157,18 +159,32 @@ python ../scripts/extractReadsBySpecies.py \
 # Output files:
 #   Seub_1.fastq.gz, Seub_2.fastq.gz
 #   Suva_1.fastq.gz, Suva_2.fastq.gz
-#   Seub_ids.txt, Suva_ids.txt (if --output-format both)
+#   Seub_ids.txt, Suva_ids.txt (if --output-format list)
 ```
 
 #### Extract from SAM file directly:
 
 ```bash
+# Single-end reads
 python ../scripts/extractReadsBySpecies.py \
     --sam-file Sbay_out.sam \
     --fastq ERR1544719_1.fastq.gz \
     --species Seub \
     --mq-min 30 \
     --output-format fastq.gz
+
+# Paired-end reads with both FASTQ and ID list output
+python ../scripts/extractReadsBySpecies.py \
+    --sam-file Sbay_out.sam \
+    --fastq ERR1544719_1.fastq.gz \
+    --fastq2 ERR1544719_2.fastq.gz \
+    --species Seub,Suva \
+    --mq-min 30 \
+    --output-format both
+
+# Output files:
+#   Seub_1.fastq.gz, Seub_2.fastq.gz, Seub_ids.txt
+#   Suva_1.fastq.gz, Suva_2.fastq.gz, Suva_ids.txt
 ```
 
 #### Output only ID lists (no FASTQ extraction):
@@ -197,7 +213,7 @@ python ../scripts/extractReadsBySpecies.py \
 | `--mapping-tool` | Mapping tool: bwa, minimap2 | bwa |
 | `--extract-species` | Species to extract (comma-separated) | - |
 | `--extract-mq` | MQ threshold for extraction | 30 |
-| `--extract-format` | Output format: fastq, fastq.gz, list, both | fastq.gz |
+| `--extract-format` | Output format: fastq.gz, list, both | fastq.gz |
 | `--skip-plot` | Skip all plotting steps | false |
 | `--skip-depth` | Skip depth calculation and plotting | false |
 | `--keep-sam` | Keep SAM file after processing | false |
@@ -216,7 +232,7 @@ python ../scripts/extractReadsBySpecies.py \
 | `--species` | Target species (comma-separated, required) | - |
 | `--mq-min` | Minimum mapping quality | 0 |
 | `--mq-max` | Maximum mapping quality | 60 |
-| `--output-format` | Output: fastq, fastq.gz, list, both | both |
+| `--output-format` | Output: fastq.gz, list, both | fastq.gz |
 | `--out` | Output directory | current directory |
 | `--include-unmapped` | Include unmapped reads | false |
 | `--no-seqtk` | Force Python extraction (slower) | false |

@@ -31,7 +31,7 @@ parser.add_argument('--seq-type', choices=['PacBio', 'ONT'], help="Set sequence 
 parser.add_argument('--mapping-tool', choices=['bwa', 'minimap2'], help="Set mapping tool (default is bwa, optional is minimap2)", default='bwa')
 parser.add_argument('--extract-species', help="Extract reads for specified species (comma-separated, e.g., Scer,Sbay)")
 parser.add_argument('--extract-mq', type=int, default=30, help="Minimum MQ threshold for species extraction (default: 30)")
-parser.add_argument('--extract-format', choices=['fastq', 'fastq.gz', 'list', 'both'], default='fastq.gz', help="Output format for extracted reads: fastq, fastq.gz (compressed), list, or both (default: fastq.gz)")
+parser.add_argument('--extract-format', choices=['fastq.gz', 'list', 'both'], default='fastq.gz', help="Output format for extracted reads: fastq.gz (compressed FASTQ), list (IDs only), or both (default: fastq.gz)")
 parser.add_argument('--skip-plot', action='store_true', help="Skip all plotting steps (MQ plot, depth plots) to save time")
 parser.add_argument('--skip-depth', action='store_true', help="Skip depth calculation and plotting (bedtools and R depth analysis)")
 parser.add_argument('--keep-sam', action='store_true', help="Keep SAM file after processing (default: delete to save space)")

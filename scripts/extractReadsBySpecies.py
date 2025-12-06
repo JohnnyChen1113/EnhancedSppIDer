@@ -59,8 +59,8 @@ Examples:
                         help="Minimum mapping quality threshold (default: 0)")
     parser.add_argument('--mq-max', type=int, default=60,
                         help="Maximum mapping quality threshold (default: 60)")
-    parser.add_argument('--output-format', choices=['fastq', 'fastq.gz', 'list', 'both'], default='both',
-                        help="Output format: fastq, fastq.gz (compressed), list (IDs only), or both (default: both)")
+    parser.add_argument('--output-format', choices=['fastq.gz', 'list', 'both'], default='fastq.gz',
+                        help="Output format: fastq.gz (compressed FASTQ), list (IDs only), or both (default: fastq.gz)")
     parser.add_argument('--out', help="Output directory (default: current directory)")
     parser.add_argument('--include-unmapped', action='store_true',
                         help="Include unmapped reads (species='*') in output")
@@ -69,8 +69,8 @@ Examples:
 
     args = parser.parse_args()
 
-    # Validate: FASTQ required for fastq output
-    if args.output_format in ['fastq', 'fastq.gz', 'both'] and not args.fastq:
+    # Validate: FASTQ required for fastq.gz output
+    if args.output_format in ['fastq.gz', 'both'] and not args.fastq:
         parser.error("--fastq is required when output format includes FASTQ")
 
     return args
@@ -339,14 +339,13 @@ def main():
     print()
 
     # Output FASTQ files (per species)
-    compress_output = args.output_format == 'fastq.gz'
     has_errors = False
 
-    if args.output_format in ['fastq', 'fastq.gz', 'both']:
+    if args.output_format in ['fastq.gz', 'both']:
         print("Extracting FASTQ reads by species...")
 
-        # Determine output extension
-        ext = '.fastq.gz' if compress_output else '.fastq'
+        # Output extension is always .fastq.gz
+        ext = '.fastq.gz'
 
         for species in sorted(read_ids.keys()):
             id_list_file = output_id_files[species]
@@ -359,14 +358,14 @@ def main():
                 output_fastq = os.path.join(output_dir, f"{species}{ext}")
 
             if use_seqtk:
-                success = extract_with_seqtk(args.fastq, id_list_file, output_fastq, compress=compress_output)
+                success = extract_with_seqtk(args.fastq, id_list_file, output_fastq, compress=True)
                 if success:
                     count = count_fastq_reads(output_fastq)
                     print(f"  {output_fastq}: {count} reads (seqtk)")
                 else:
                     has_errors = True
             else:
-                count = extract_with_python(args.fastq, species_ids, output_fastq, compress=compress_output)
+                count = extract_with_python(args.fastq, species_ids, output_fastq, compress=True)
                 print(f"  {output_fastq}: {count} reads (Python)")
 
             # Extract from second FASTQ file (R2) if provided
@@ -374,14 +373,14 @@ def main():
                 output_fastq2 = os.path.join(output_dir, f"{species}_2{ext}")
 
                 if use_seqtk:
-                    success = extract_with_seqtk(args.fastq2, id_list_file, output_fastq2, compress=compress_output)
+                    success = extract_with_seqtk(args.fastq2, id_list_file, output_fastq2, compress=True)
                     if success:
                         count2 = count_fastq_reads(output_fastq2)
                         print(f"  {output_fastq2}: {count2} reads (seqtk)")
                     else:
                         has_errors = True
                 else:
-                    count2 = extract_with_python(args.fastq2, species_ids, output_fastq2, compress=compress_output)
+                    count2 = extract_with_python(args.fastq2, species_ids, output_fastq2, compress=True)
                     print(f"  {output_fastq2}: {count2} reads (Python)")
 
         # Clean up temporary ID lists if not requested by user
