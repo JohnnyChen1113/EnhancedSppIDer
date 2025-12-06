@@ -39,7 +39,7 @@ conda install kingfisher
 ### Clone the repository
 
 ```bash
-git clone https://github.com/your-repo/EnhancedSppIDer.git
+git clone https://github.com/JohnnyChen1113/EnhancedSppIDer.git
 cd EnhancedSppIDer
 ```
 
@@ -50,7 +50,7 @@ cd EnhancedSppIDer
 Create a key file (tab-separated) listing species names and their FASTA files. Example files (`Seub.fasta`, `Suva.fasta`, `SbayKey.txt`) are provided in the `examples/` directory:
 
 ```bash
-# Example key file (examples/SbayKey.txt)
+# Example key file (You can find it in examples/SbayKey.txt)
 Seub	Seub.fasta
 Suva	Suva.fasta
 ```
@@ -59,7 +59,7 @@ Combine reference genomes:
 
 ```bash
 cd examples
-python ../scripts/combineRefGenomes.py --key SbayKey.txt --out Sbay
+python scripts/combineRefGenomes.py --key SbayKey.txt --out Sbay
 ```
 
 This generates:
@@ -77,11 +77,10 @@ You can download sequencing data using any tool of your choice. Here is an examp
 kingfisher get -r ERR1544719 -m aws-http -f fastq.gz --download-threads 8
 ```
 
-Other options include `wget`, `curl`, `sra-tools (fasterq-dump)`, etc.
 
 ### Step 3: Run sppIDer Pipeline
 
-#### Basic usage (Illumina paired-end):
+#### Basic usage, same as original sppIDer (Illumina paired-end):
 
 ```bash
 python ../scripts/sppIDer.py \
@@ -92,7 +91,7 @@ python ../scripts/sppIDer.py \
     --cores 8
 ```
 
-#### With species extraction:
+#### With species extraction (in the case that you want get the sequance of each species beyond plots):
 
 ```bash
 python ../scripts/sppIDer.py \
