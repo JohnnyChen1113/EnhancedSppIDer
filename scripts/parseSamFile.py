@@ -21,16 +21,19 @@ outputLenName = inputName + "_chrLens.txt"
 start = time.time()
 
 speciesDict = {}
-MQscoreDict = {}
 speciesDict["*"] = {}
 speciesDict["*"][0] = {'count': 0, 'names': []}
 speciesList = ['*']
 
-with open(workingDir / outputLenName, 'w', encoding='utf-8') as outputLen, open(workingDir / samName, 'r', encoding='utf-8') as sam:
-    samLines = sam.read().splitlines()
-    for line in samLines:
-        if re.match('^(@SQ)', line):
-            headerInfo = line.split('\t')
+# First pass: read header lines to get chromosome info, then process alignments
+# Use line-by-line reading to avoid loading entire SAM file into memory
+with open(workingDir / outputLenName, 'w', encoding='utf-8') as outputLen, \
+     open(workingDir / samName, 'r', encoding='utf-8') as sam:
+
+    for line in sam:
+        if line.startswith('@SQ'):
+            # Header line with sequence info
+            headerInfo = line.strip().split('\t')
             chrInfo = headerInfo[1].split(":")[1]
             chrName = chrInfo.split("-")
             speciesName = chrName[0]
@@ -42,24 +45,40 @@ with open(workingDir / outputLenName, 'w', encoding='utf-8') as outputLen, open(
                 speciesDict[speciesName] = {}
                 for i in range(0, 61):
                     speciesDict[speciesName][i] = {'count': 0, 'names': []}
-        elif re.match('^(?!@)', line):
+        elif not line.startswith('@'):
+            # Alignment line
             lineSplit = line.split('\t')
+            if len(lineSplit) < 5:
+                continue
             sequenceName = lineSplit[0]
-            chr = lineSplit[2].split("-")
-            species = chr[0]
+            chrField = lineSplit[2]
+
+            if chrField == '*':
+                species = '*'
+            else:
+                species = chrField.split("-")[0]
+
             MQscore = int(lineSplit[4])
+
+            if species not in speciesDict:
+                speciesDict[species] = {}
             if MQscore not in speciesDict[species]:
                 speciesDict[species][MQscore] = {'count': 0, 'names': []}
+
             speciesDict[species][MQscore]['count'] += 1
             speciesDict[species][MQscore]['names'].append(sequenceName)
 
 with open(workingDir / outputName, 'w', encoding='utf-8') as output:
     output.write("Species\tMQscore\tcount\tSequenceNames\n")
     for species in speciesList:
-        for score in speciesDict[species].keys():
+        if species not in speciesDict:
+            continue
+        for score in sorted(speciesDict[species].keys()):
             count = speciesDict[species][score]['count']
+            if count == 0:
+                continue
             names = ",".join(speciesDict[species][score]['names'])
             output.write(f"{species}\t{score}\t{count}\t{names}\n")
 
 currentTime = time.time() - start
-print(str(currentTime) + " secs\n")
+print(f"{currentTime:.2f} secs")

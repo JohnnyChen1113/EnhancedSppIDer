@@ -14,8 +14,8 @@ strainName <- args[1]
 #
 ################################################################
 
-# docker vars
-workingDir <- "/tmp/sppIDer/working/"
+# Use current working directory
+workingDir <- paste0(getwd(), "/")
 
 #Read in data
 strain <- read.table(paste(workingDir, strainName, ".bedgraph", sep=""), header=FALSE, col.names = c("chrom", "regionStart", "regionEnd",  "value"))

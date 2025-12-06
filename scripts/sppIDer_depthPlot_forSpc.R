@@ -13,9 +13,8 @@ outputPrefix <- args[1]
 #
 ################################################################
 
-# docker vars
-workingDir <- "/tmp/sppIDer/working/"
-#workingDir <- ""
+# Use current working directory
+workingDir <- paste0(getwd(), "/")
 
 #Read in data, get info on window size and spread of mean values. Add log2 and a rescaled mean column to be plotted later.
 dataFileName <- paste(workingDir, outputPrefix, "_speciesAvgDepth-d.txt", sep="")

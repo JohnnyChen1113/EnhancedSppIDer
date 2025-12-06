@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-import sys, re, argparse
+import sys, re, argparse, os
 
 ################################################################
 # This script will create a file to demark and label coding regions for mitoSppIDer.
@@ -11,8 +11,8 @@ import sys, re, argparse
 #
 ################################################################
 
-# docker vars
-workingDir = "/tmp/sppIDer/working/"
+# Use current working directory instead of docker path
+workingDir = os.path.join(os.getcwd(), '')
 
 parser = argparse.ArgumentParser(description="Combine desired reference gffs of coding regions")
 parser.add_argument('--out', help="Output prefix, required", required=True)

@@ -1,6 +1,8 @@
 __author__ = 'Quinn'
+__modified_by__ = 'Junhao Chen'
 
-import argparse, multiprocessing, sys, re, subprocess, time
+import argparse, multiprocessing, sys, re, subprocess, time, os
+from version import __version__
 
 ###############################################################
 # This script runs the mitoSppIDer pipeline. Which is meant for mapping short read data to a combined genome of just mitochondiral genomes (or other small genomes)
@@ -17,6 +19,7 @@ import argparse, multiprocessing, sys, re, subprocess, time
 ################################################################
 
 parser = argparse.ArgumentParser(description="Run full sppIDer")
+parser.add_argument('--version', action='version', version=f'%(prog)s {__version__}')
 parser.add_argument('--out', help="Output prefix, required", required=True)
 parser.add_argument('--ref', help="Reference Genome, required", required=True)
 parser.add_argument('--r1', help="Read1, required", required=True)
@@ -24,9 +27,9 @@ parser.add_argument('--r2', help="Read2, optional")
 parser.add_argument('--gff', help="Key to gff file, optional")
 args = parser.parse_args()
 
-# docker vars
-scriptDir = "/tmp/sppIDer/"
-workingDir = "/tmp/sppIDer/working/"
+# Use current working directory instead of docker path
+scriptDir = os.path.join(os.path.dirname(os.path.abspath(__file__)), '')
+workingDir = os.path.join(os.getcwd(), '')
 numCores = str(multiprocessing.cpu_count())
 
 outputPrefix = args.out
@@ -116,7 +119,7 @@ trackerOut.write("\nbedgraph complete\nElapsed time: " + elapsedTime)
 trackerOut.close()
 
 ########################## parse SAM file ###########################
-subprocess.call(["python2.7", scriptDir + "parseSamFile.py", outputPrefix], cwd=workingDir)
+subprocess.call(["python3", os.path.join(scriptDir, "parseSamFile.py"), outputPrefix], cwd=workingDir)
 print("Parsed SAM file")
 currentTime = time.time()-start
 elapsedTime = calcElapsedTime(currentTime)
