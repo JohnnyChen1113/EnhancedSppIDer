@@ -33,7 +33,7 @@ conda install -c bioconda minimap2
 conda install -c conda-forge r-base r-ggplot2 r-dplyr
 
 # Optional: kingfisher for downloading SRA data
-pip install kingfisher
+conda install kingfisher
 ```
 
 ### Clone the repository
@@ -47,43 +47,46 @@ cd EnhancedSppIDer
 
 ### Step 1: Prepare Reference Genomes
 
-Create a key file (tab-separated) listing species names and their FASTA files:
+Create a key file (tab-separated) listing species names and their FASTA files. Example files (`Seub.fasta`, `Suva.fasta`, `SbayKey.txt`) are provided in the `examples/` directory:
 
 ```bash
-# Create key file
-cat > SbayKey.txt << 'EOF'
-Scer	S288c.fasta
-Sbay	GCA_016858285.1.fasta
-EOF
+# Example key file (examples/SbayKey.txt)
+Seub	Seub.fasta
+Suva	Suva.fasta
 ```
 
 Combine reference genomes:
 
 ```bash
-python scripts/combineRefGenomes.py --key SbayKey.txt --out Sbay_combo.fasta
+cd examples
+python ../scripts/combineRefGenomes.py --key SbayKey.txt --out Sbay
 ```
 
 This generates:
-- `Sbay_combo.fasta` - Combined reference genome
-- `Sbay_combo.fasta.amb`, `.ann`, `.bwt`, `.pac`, `.sa` - BWA index files
-- `Sbay_combo.fasta.fai` - Samtools index
-- `comboLength_Sbay_combo.fasta.txt` - Contig lengths
+- `Sbay` - Combined reference genome
+- `Sbay.amb`, `.ann`, `.bwt`, `.pac`, `.sa` - BWA index files
+- `Sbay.fai` - Samtools index
+- `comboLength_Sbay.txt` - Contig lengths
 
-### Step 2: Download Test Data (Optional)
+### Step 2: Download Test Data (For Example)
+
+You can download sequencing data using any tool of your choice. Here is an example using [kingfisher](https://github.com/wwood/kingfisher-download):
 
 ```bash
-# Download example data from SRA
+# Example: Download data from SRA using kingfisher
 kingfisher get -r ERR1544719 -m aws-http -f fastq.gz --download-threads 8
 ```
+
+Other options include `wget`, `curl`, `sra-tools (fasterq-dump)`, etc.
 
 ### Step 3: Run sppIDer Pipeline
 
 #### Basic usage (Illumina paired-end):
 
 ```bash
-python scripts/sppIDer.py \
-    --out test_run \
-    --ref Sbay_combo.fasta \
+python ../scripts/sppIDer.py \
+    --out Sbay_out \
+    --ref Sbay \
     --r1 ERR1544719_1.fastq.gz \
     --r2 ERR1544719_2.fastq.gz \
     --cores 8
@@ -92,13 +95,13 @@ python scripts/sppIDer.py \
 #### With species extraction:
 
 ```bash
-python scripts/sppIDer.py \
-    --out test_run \
-    --ref Sbay_combo.fasta \
+python ../scripts/sppIDer.py \
+    --out Sbay_out \
+    --ref Sbay \
     --r1 ERR1544719_1.fastq.gz \
     --r2 ERR1544719_2.fastq.gz \
     --cores 8 \
-    --extract-species Scer,Sbay \
+    --extract-species Seub,Suva \
     --extract-mq 30 \
     --extract-format fastq.gz
 ```
@@ -106,32 +109,32 @@ python scripts/sppIDer.py \
 #### Fast mode (skip plotting):
 
 ```bash
-python scripts/sppIDer.py \
-    --out test_run \
-    --ref Sbay_combo.fasta \
+python ../scripts/sppIDer.py \
+    --out Sbay_out \
+    --ref Sbay \
     --r1 ERR1544719_1.fastq.gz \
     --r2 ERR1544719_2.fastq.gz \
     --cores 8 \
     --skip-plot \
-    --extract-species Scer,Sbay
+    --extract-species Seub,Suva
 ```
 
 #### Long-read data (PacBio/ONT):
 
 ```bash
 # PacBio with minimap2
-python scripts/sppIDer.py \
+python ../scripts/sppIDer.py \
     --out pacbio_run \
-    --ref Sbay_combo.fasta \
+    --ref Sbay \
     --r1 pacbio_reads.fastq.gz \
     --seq-type PacBio \
     --mapping-tool minimap2 \
     --cores 12
 
 # Oxford Nanopore
-python scripts/sppIDer.py \
+python ../scripts/sppIDer.py \
     --out ont_run \
-    --ref Sbay_combo.fasta \
+    --ref Sbay \
     --r1 nanopore_reads.fastq.gz \
     --seq-type ONT \
     --mapping-tool minimap2 \
@@ -144,27 +147,27 @@ If you already have sppIDer output and want to extract reads separately:
 
 ```bash
 # Extract reads for specific species from MQ file
-python scripts/extractReadsBySpecies.py \
-    --mq-file test_run_MQ.txt \
+python ../scripts/extractReadsBySpecies.py \
+    --mq-file Sbay_out_MQ.txt \
     --fastq ERR1544719_1.fastq.gz \
     --fastq2 ERR1544719_2.fastq.gz \
-    --species Scer,Sbay \
+    --species Seub,Suva \
     --mq-min 30 \
     --output-format fastq.gz
 
 # Output files:
-#   Scer_1.fastq.gz, Scer_2.fastq.gz
-#   Sbay_1.fastq.gz, Sbay_2.fastq.gz
-#   Scer_ids.txt, Sbay_ids.txt (if --output-format both)
+#   Seub_1.fastq.gz, Seub_2.fastq.gz
+#   Suva_1.fastq.gz, Suva_2.fastq.gz
+#   Seub_ids.txt, Suva_ids.txt (if --output-format both)
 ```
 
 #### Extract from SAM file directly:
 
 ```bash
-python scripts/extractReadsBySpecies.py \
-    --sam-file test_run.sam \
-    --fastq reads.fastq.gz \
-    --species Scer \
+python ../scripts/extractReadsBySpecies.py \
+    --sam-file Sbay_out.sam \
+    --fastq ERR1544719_1.fastq.gz \
+    --species Seub \
     --mq-min 30 \
     --output-format fastq.gz
 ```
@@ -172,9 +175,9 @@ python scripts/extractReadsBySpecies.py \
 #### Output only ID lists (no FASTQ extraction):
 
 ```bash
-python scripts/extractReadsBySpecies.py \
-    --mq-file test_run_MQ.txt \
-    --species Scer,Sbay \
+python ../scripts/extractReadsBySpecies.py \
+    --mq-file Sbay_out_MQ.txt \
+    --species Seub,Suva \
     --mq-min 30 \
     --output-format list
 ```
