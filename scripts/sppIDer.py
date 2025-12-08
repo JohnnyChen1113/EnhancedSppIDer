@@ -39,6 +39,12 @@ parser.add_argument('--keep-intermediate', action='store_true', help="Keep inter
 parser.set_defaults(bed=True)
 args = parser.parse_args()
 
+# Validate: minimap2 with paired-end short reads is not supported
+if args.mapping_tool == 'minimap2' and args.r2 and not args.seq_type:
+    parser.error("minimap2 with paired-end short reads is not supported. "
+                 "Please use --mapping-tool bwa for paired-end short reads, "
+                 "or specify --seq-type (PacBio/ONT) for long reads (single-end only).")
+
 # docker vars
 scriptDir = os.path.join(os.path.dirname(os.path.abspath(__file__)), '')
 workingDir = os.path.join(os.getcwd(), '')
@@ -103,7 +109,10 @@ match args.mapping_tool:
             print("Executing command:", " ".join(command))
             subprocess.call(command, stdout=bwaOutFile, cwd=workingDir)
         else:
+            # Short reads: support paired-end if read2 is provided
             command = [args.mapping_tool, "mem", "-t", numCores, refGen, read1Name]
+            if read2Name:
+                command.append(read2Name)
             print("Executing command:", " ".join(command))
             subprocess.call(command, stdout=bwaOutFile, cwd=workingDir)
     case 'minimap2':
