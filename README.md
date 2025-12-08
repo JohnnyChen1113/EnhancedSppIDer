@@ -17,6 +17,11 @@ An enhanced version of [sppIDer](https://github.com/GLBRC/sppIDer) for species i
 ### Dependencies
 
 Install via conda (recommended):
+```
+conda install -c bioconda enhancedsppider
+```
+
+Or you can also install it step by step like:
 
 ```bash
 conda create -n sppider python=3.10
