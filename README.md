@@ -1,6 +1,6 @@
 # EnhancedSppIDer
 
-**Version: 0.2.1**
+**Version: 0.2.2**
 
 An enhanced version of [sppIDer](https://github.com/GLBRC/sppIDer) for species identification and read extraction from sequencing data.
 
@@ -281,6 +281,14 @@ python ../scripts/extractReadsBySpecies.py \
 4. **Adjust cores**: Use `--cores` to match your system
 
 ## Changelog
+
+### v0.2.2
+- **Bug fix**: Fixed missing read2 parameter for BWA paired-end mapping (R2 was silently ignored)
+- Added validation to prevent unsupported minimap2 + paired-end short reads combination
+
+### v0.2.1
+- Removed uncompressed FASTQ output option (`fastq`), now only supports `fastq.gz` for disk efficiency
+- Available to install via Bioconda: `conda install -c bioconda enhancedsppider`
 
 ### v0.2.0
 - Removed Docker dependency, works in conda environment
